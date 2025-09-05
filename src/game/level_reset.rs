@@ -1,4 +1,4 @@
-use bevy::{color::Color, ecs::{entity::Entity, query::With, system::{Commands, Query, Res, ResMut, Single}}, sprite::Sprite, state::state::NextState, time::Time};
+use bevy::{color::Color, ecs::{entity::Entity, query::With, system::{Commands, Query, Res, ResMut, Single}}, log::debug, sprite::Sprite, state::state::NextState, time::Time};
 use crate::{game::{game::{CurrentLevel, TotalGameStats}, level_setup::{RustaceanPos, TrapTile}, levels::{LevelEndTimer, LevelState}}, utils::hexgrid_utils::GridTilePos};
 
 pub fn reset_level(
@@ -14,7 +14,7 @@ pub fn reset_level(
     level_end_timer.0.tick(time.delta());
 
     
-    println!("checking timer");
+    debug!("checking timer");
     if level_end_timer.0.elapsed_secs() >= 3.0 {
         commands.remove_resource::<LevelEndTimer>();
         for (entity, mut sprite) in tile_q {
@@ -28,7 +28,7 @@ pub fn reset_level(
 
         commands.entity(rustacean_entity).despawn(); 
 
-        println!("adding level");
+        debug!("adding level");
         current_level.0 += 1;
 
         if current_level.0 > total_stats.record_level {

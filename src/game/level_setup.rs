@@ -1,4 +1,5 @@
 use bevy::{asset::AssetServer, color::{palettes::css::DARK_GRAY, Color}, ecs::{component::Component, entity::Entity, observer::Trigger, query::Without, system::{Commands, Query, Res, ResMut, Single}}, math::Vec2, picking::events::{Click, Pointer}, sprite::Sprite, state::state::{NextState, State}, transform::components::GlobalTransform};
+use log::debug;
 
 use crate::{game::{game::{CurrentLevel, TotalGameStats}, levels::{CurrentLevelTaps, TurnState}}, utils::hexgrid_utils::{get_hex_horizontal_neighbor_pos, GridSize, GridTilePos, HextileF2FSize}};
 
@@ -29,7 +30,7 @@ pub fn spawn_rustacean(
     grid_query: Single<(&HextileF2FSize, &GridSize)>,
     tile_query: Query<(&GridTilePos, &GlobalTransform)>
 ) {
-    println!("spawning_rustacean: getting grid size");
+    debug!("spawning_rustacean: getting grid size");
     let (f2f_size, grid_size) = grid_query.into_inner();
 
     let texture = asset_server.load("rustacean.png");
@@ -40,13 +41,13 @@ pub fn spawn_rustacean(
         (f2f_size.0 * size_mult) * 0.667_f32
     );
 
-    println!("spawning_rustacean: getting tile positions");
+    debug!("spawning_rustacean: getting tile positions");
     for (tile_pos, global_transform) in tile_query.iter() {
         if tile_pos.x == grid_size.cols/2 && tile_pos.y == (grid_size.rows/2) {
             let mut transform = global_transform.compute_transform();
             transform.translation.z = 0.1;
 
-            println!("spawning_rustacean: spawning rustacean");
+            debug!("spawning_rustacean: spawning rustacean");
 
             commands.spawn((
                 RustaceanPos::new(tile_pos.x as i32, tile_pos.y as i32),
@@ -69,10 +70,10 @@ pub fn prepare_tile_traps(
     mut tile_query: Query<(Entity, &GridTilePos, &mut Sprite)>
 ) {
     
-    println!("preparing tiles: getting grid size");
+    debug!("preparing tiles: getting grid size");
     let total_tile_amount = grid_size.count();
 
-    println!("preparing tiles: calculating trap number");
+    debug!("preparing tiles: calculating trap number");
     let num_of_traps = ((total_tile_amount as f32 * 0.25974).round() as u32 - 
     (if current_level.0 < 21 { 
         current_level.0 - 1
@@ -84,14 +85,14 @@ pub fn prepare_tile_traps(
 
 
 
-    println!("preparing tiles: calculating trap positions");
+    debug!("preparing tiles: calculating trap positions");
     let trap_positions = loop {
 
         let trap_positions = find_suitable_trap_positions(num_of_traps, &grid_size, &rustacean_pos);
         // check if the rustacean is blocked in 
         if rustacean_pos.get_neighbor_pos().iter().all(| (x, y) | trap_positions.contains(&(*x, *y)) ) {
-            println!("Invalid!!!\nNeighbors: {:?}", rustacean_pos.get_neighbor_pos());
-            println!("Traps: {:?}\n> continuing", trap_positions);
+            debug!("Invalid!!!\nNeighbors: {:?}", rustacean_pos.get_neighbor_pos());
+            debug!("Traps: {:?}\n> continuing", trap_positions);
             continue
         } else {
             break trap_positions
@@ -103,10 +104,10 @@ pub fn prepare_tile_traps(
 
 
 
-    println!("preparing tiles: getting the tile entities");
+    debug!("preparing tiles: getting the tile entities");
     for (entity, pos, mut sprite) in tile_query.iter_mut() {
 
-        println!("preparing tiles: adding traps to tile ({}, {})",pos.x, pos.y);
+        debug!("preparing tiles: adding traps to tile ({}, {})",pos.x, pos.y);
         // add traps to some
         if trap_positions.contains(&(pos.x, pos.y)) {
             sprite.color = Color::Srgba(DARK_GRAY);
@@ -178,7 +179,7 @@ pub fn find_suitable_trap_positions(num_of_traps: usize, grid_size: &GridSize, r
         // or if its in the position of the rustacean
         if trap_positions.contains(&(x, y)) 
             || (x == rustacean_pos.x && y == rustacean_pos.y) {
-            println!("Invalid!!!\nAttempted position: {x}, {y}\n> continuing");
+            debug!("Invalid!!!\nAttempted position: {x}, {y}\n> continuing");
             continue
         }
         trap_positions.push((x, y));

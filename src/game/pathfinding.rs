@@ -1,6 +1,6 @@
 use std::{collections::{HashMap, HashSet, VecDeque}, fmt::Display};
 use anyhow::Context;
-use bevy::{color::{palettes::css::{LIGHT_GREEN, RED}, Color}, ecs::{query::{With, Without}, system::{Query, ResMut}}, math::Vec2, sprite::Sprite, state::state::NextState, transform::components::{GlobalTransform, Transform}};
+use bevy::{color::{palettes::css::{LIGHT_GREEN, RED}, Color}, ecs::{query::{With, Without}, system::{Query, ResMut}}, math::Vec2, log::error, sprite::Sprite, state::state::NextState, transform::components::{GlobalTransform, Transform}};
 use crate::{game::{game::TotalGameStats, level_setup::{RustaceanPos, TrapTile}, levels::{LevelState, TurnState}}, utils::hexgrid_utils::{get_hex_horizontal_neighbor_pos, GridSize, GridTilePos, HexGridOrientation, HextileF2FSize}};
 
 pub fn coord_to_world(x: i32, y: i32, grid_size: &GridSize, hextile_f2f_size: &HextileF2FSize, orientation: &HexGridOrientation) -> Vec2 {
@@ -43,7 +43,7 @@ pub fn coord_to_world(x: i32, y: i32, grid_size: &GridSize, hextile_f2f_size: &H
             return Vec2::new(x,y);
         },
         HexGridOrientation::Horizontal => {
-            println!("Error: not functional yet, fucking wait");
+            error!("Error: not functional yet, fucking wait");
             panic!()
         }
     }

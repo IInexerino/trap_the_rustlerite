@@ -1,4 +1,4 @@
-use bevy::{asset::{AssetServer, Handle}, ecs::{component::Component, hierarchy::ChildOf, system::{Commands, Res}}, image::Image, math::{Vec2, Vec3}, picking::Pickable, render::view::Visibility, sprite::Sprite, transform::components::Transform};
+use bevy::{asset::{AssetServer, Handle}, ecs::{component::Component, hierarchy::ChildOf, system::{Commands, Res}}, image::Image, math::{Vec2, Vec3}, picking::Pickable, render::view::Visibility, log::error, sprite::Sprite, transform::components::Transform};
 
 use crate::game::level_setup::tile_observer;
 
@@ -138,7 +138,7 @@ impl GridTilePos {
                 return Vec2::new(x,y);
             },
             HexGridOrientation::Horizontal => {
-                println!("Error: not functional yet, fucking wait");
+                error!("Error: not functional yet, fucking wait");
                 panic!()
             }
         }

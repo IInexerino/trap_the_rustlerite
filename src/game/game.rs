@@ -134,7 +134,7 @@ fn add_clicking_observers_to_tiles(
     for entity in tile_q {
         
 
-        println!("preparing tiles: adding observers to tile");
+        debug!("preparing tiles: adding observers to tile");
         commands.entity(entity).observe(tile_observer());
     }
 }
