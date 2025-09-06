@@ -1,9 +1,3 @@
-Relatively completed
-
-It would be cool:
-
-1. to make the rustacean hop from square to square rather than teleporting
-2. for there to be a pause menu
-3. add f11 windowmode functionality
-4. make high scores persist past app closure
-5. spice up the game
+# Trap the Rustlerite
+Relatively completed recreation of "Trap the Tiger",
+sometimes known as "Catch the Cat" in the Bevy game engine

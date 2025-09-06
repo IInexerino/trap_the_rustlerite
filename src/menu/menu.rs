@@ -1,5 +1,5 @@
 use bevy::{app::{AppExit, Plugin, Update}, color::{palettes::css::ORANGE, Color}, ecs::{ component::Component, entity::Entity, event::EventWriter, query::{Changed, With}, schedule::IntoScheduleConfigs, system::{Commands, Query, Res, ResMut}}, prelude::{children, SpawnRelated}, state::{app::AppExtStates, condition::in_state, state::{NextState, OnEnter, OnExit}}, text::{TextColor, TextFont}, ui::{widget::{Button, Text}, AlignItems, BackgroundColor, FlexDirection, Interaction, JustifyContent, Node, UiRect, Val}, utils::default};
-use crate::game::game::{AppState, MenuState, TotalGameStats};
+use crate::game::game::{save_total_game_stats, AppState, MenuState, TotalGameStats};
 
 const TEXT_COLOR: Color = Color::srgb(0.9, 0.9, 0.9);
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
@@ -32,6 +32,10 @@ impl Plugin for MenuPlugin {
         .add_systems(
             OnExit(MenuState::Stats), 
             despawn_screen::<StatsMenuScreen>,
+        )
+        .add_systems(
+            OnEnter(MenuState::Quit), 
+            (save_total_game_stats, exit_game).chain()
         )
         .add_systems(
             Update, 
@@ -168,7 +172,6 @@ fn setup_stats_menu(
         },
     );
 
-
     commands.spawn((
         Node {
             width: Val::Percent(100.0),
@@ -297,6 +300,12 @@ pub fn main_menu_loop(
 }
 */
 
+fn exit_game(
+    mut app_exit_events: EventWriter<AppExit>,
+) {
+    app_exit_events.write(AppExit::Success);
+}
+
 // This system handles changing all buttons color based on mouse interaction
 fn button_system(
     mut interaction_query: Query<
@@ -320,7 +329,6 @@ fn menu_action(
         (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
     >,
-    mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<MenuState>>,
     mut app_state: ResMut<NextState<AppState>>,
 ) {
@@ -332,9 +340,7 @@ fn menu_action(
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Stats => menu_state.set(MenuState::Stats),
-                MenuButtonAction::Quit => {
-                    app_exit_events.write(AppExit::Success);
-                }
+                MenuButtonAction::Quit => menu_state.set(MenuState::Quit),
                 MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Main),
             }
         }

@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use anyhow::Context;
 use bevy::{prelude::*};
 use crate::{ game::{level_reset::reset_level, level_setup::{prepare_tile_traps, spawn_rustacean, tile_observer}, levels::{despawn_current_stats, goto_main_menu, level_text_update, reset_current_level_taps, run_levelend_timer, set_player_turn, spawn_current_stats_text, LevelState, TurnState}, pathfinding::pathfind_and_move}, utils::hexgrid_utils::{get_startup_hexgrid, GridSize, GridTilePos, HexGridOrientation, HextileF2FSize}};
 
@@ -18,7 +21,7 @@ impl Plugin for GamePlugin {
             }
         );
 
-        app.add_systems(Startup, spawn_camera);
+        app.add_systems(Startup, (spawn_camera, setup_total_game_stats));
 
         app.init_state::<LevelState>();
         app.add_systems(
@@ -55,7 +58,7 @@ impl Plugin for GamePlugin {
         );
         app.add_systems(
             OnEnter(LevelState::LevelWin), 
-                run_levelend_timer,
+                (run_levelend_timer, save_total_game_stats)
         )
         .add_systems(
             Update, 
@@ -66,7 +69,7 @@ impl Plugin for GamePlugin {
         )
         .add_systems(
             OnEnter(LevelState::LevelLose), 
-                run_levelend_timer,
+                (run_levelend_timer, save_total_game_stats)
         )
         .add_systems(
             Update, 
@@ -94,23 +97,67 @@ pub enum MenuState{
     Disabled,
     Main,
     Stats,
+    Quit
 }
 
 #[derive(Resource)]
 pub struct CurrentLevel(pub u32);
 
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, serde::Serialize, serde::Deserialize)]
 pub struct TotalGameStats {
-    pub tiles_tapped: u32,
-    pub tigers_trapped: u32,
-    pub tigers_escaped: u32,
-    pub games_played: u32,
-    pub record_level: u32,
+    pub tiles_tapped: u64,
+    pub tigers_trapped: u64,
+    pub tigers_escaped: u64,
+    pub games_played: u64,
+    pub record_level: u64,
 }
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2d);
+}
+
+fn setup_total_game_stats(
+    mut commands: Commands,
+) {
+    let game_stats = if !PathBuf::from(r"./configs").exists() {
+        std::fs::create_dir("./configs")
+            .expect("Error: User should have permission to the directory location\nPath should not yet exist");
+
+        let tgame_stats = TotalGameStats {
+            record_level: 1,
+            ..Default::default()
+        };
+
+        let json = serde_json::to_string_pretty(&tgame_stats)
+            .expect("Error: Implementation of Serialize must not decide to fail\nT should contain a map with string keys");
+
+        std::fs::write(PathBuf::from(r"./configs/stats.json"), json)
+            .expect("Error: Directory ./configs must exist");
+
+        tgame_stats
+    } else {
+        let json = std::fs::read_to_string("./configs/stats.json")
+            .expect("Error: Path must exist\nContents of the file must be valid utf8");
+
+        let tgame_stats: TotalGameStats = serde_json::from_str(&json)
+            .expect("Error: the data must be possible to be parsed into TotalGameStats");
+
+        tgame_stats
+    };
+
+    commands.insert_resource(game_stats);
+}
+
+pub fn save_total_game_stats(
+    game_stats: Res<TotalGameStats>
+) {
+    let json = serde_json::to_string_pretty(game_stats.into_inner())
+        .expect("Error: Implementation of Serialize must not decide to fail\nT should contain a map with string keys");
+
+    std::fs::write(PathBuf::from(r"./configs/stats.json"), json)
+        .context("Writing game stats to json file at end of level")
+        .expect("Error: Directory ./configs must exist");
 }
 
 fn reset_current_level(
@@ -132,8 +179,6 @@ fn add_clicking_observers_to_tiles(
     mut commands: Commands,
 ) {
     for entity in tile_q {
-        
-
         debug!("preparing tiles: adding observers to tile");
         commands.entity(entity).observe(tile_observer());
     }

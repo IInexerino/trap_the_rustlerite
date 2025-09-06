@@ -31,8 +31,8 @@ pub fn reset_level(
         debug!("adding level");
         current_level.0 += 1;
 
-        if current_level.0 > total_stats.record_level {
-            total_stats.record_level = current_level.0
+        if current_level.0 as u64 > total_stats.record_level {
+            total_stats.record_level = current_level.0 as u64
         }
         
         level_st.set(LevelState::InLevel);
