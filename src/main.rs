@@ -1,6 +1,6 @@
-use bevy::{ prelude::*, window::{WindowMode, WindowResolution} };
+use bevy::{ prelude::*, window::{WindowResolution} };
 
-use crate::{ game::game::GamePlugin, menu::menu::MenuPlugin, utils::helper_utils::toggle_resolution};
+use crate::{ game::game::GamePlugin, menu::menu::MenuPlugin, utils::helper_utils::{scroll_zoom_camera_system, toggle_resolution}};
 
 mod utils;
 mod menu;
@@ -9,6 +9,8 @@ mod game;
 fn main() {
     let mut app = App::new();
 
+    let window_resolution = WindowResolution::new(960., 540. );
+
     app.add_plugins((
         DefaultPlugins
             .set(
@@ -16,9 +18,7 @@ fn main() {
                     primary_window: 
                         Some(Window{
                             title: "Trap the Tiger".into(),
-                            position: WindowPosition::Centered(MonitorSelection::Primary),
-                            resolution: WindowResolution::new(1920., 1080.),
-                            mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+                            resolution: window_resolution,
                             ..Default::default()
                         }), 
                         ..Default::default()
@@ -29,7 +29,7 @@ fn main() {
         GamePlugin
     ));
 
-    app.add_systems(Update, toggle_resolution);
+    app.add_systems(Update, (toggle_resolution, scroll_zoom_camera_system));
 
     app.run();
 }

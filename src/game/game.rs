@@ -113,8 +113,20 @@ pub struct TotalGameStats {
     pub record_level: u64,
 }
 
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn(Camera2d);
+fn spawn_camera(
+    mut commands: Commands,
+    mut uiscale: ResMut<UiScale>
+) {
+    commands.spawn((
+        Camera2d,
+        Projection::Orthographic(
+            OrthographicProjection {
+                scale: 2.0,
+                ..OrthographicProjection::default_2d()
+            }
+        )
+    ));
+    uiscale.0 = uiscale.0 / 2.;
 }
 
 fn setup_total_game_stats(
