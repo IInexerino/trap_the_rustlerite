@@ -1,6 +1,6 @@
 use bevy::{ prelude::*, window::{WindowMode, WindowResolution} };
 
-use crate::{ game::game::GamePlugin, menu::menu::MenuPlugin};
+use crate::{ game::game::GamePlugin, menu::menu::MenuPlugin, utils::helper_utils::toggle_resolution};
 
 mod utils;
 mod menu;
@@ -18,7 +18,7 @@ fn main() {
                             title: "Trap the Tiger".into(),
                             position: WindowPosition::Centered(MonitorSelection::Primary),
                             resolution: WindowResolution::new(1920., 1080.),
-                            mode: WindowMode::Fullscreen(MonitorSelection::Primary, VideoModeSelection::Current),
+                            mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                             ..Default::default()
                         }), 
                         ..Default::default()
@@ -28,6 +28,8 @@ fn main() {
         MenuPlugin,
         GamePlugin
     ));
+
+    app.add_systems(Update, toggle_resolution);
 
     app.run();
 }

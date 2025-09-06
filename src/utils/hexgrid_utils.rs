@@ -1,7 +1,5 @@
 use bevy::{asset::{AssetServer, Handle}, ecs::{component::Component, hierarchy::ChildOf, system::{Commands, Res}}, image::Image, math::{Vec2, Vec3}, picking::Pickable, render::view::Visibility, log::error, sprite::Sprite, transform::components::Transform};
 
-use crate::game::level_setup::tile_observer;
-
 // GRIDS
 /// Size of the actual grid in game in columns and rows
 #[derive(Component, Default, Clone, Copy, Debug)]

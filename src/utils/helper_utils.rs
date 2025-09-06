@@ -1,4 +1,4 @@
-use bevy::{core_pipeline::core_2d::Camera2d, ecs::{event::EventReader, query::With, system::Single}, input::mouse::MouseWheel, render::camera::Projection};
+use bevy::{core_pipeline::core_2d::Camera2d, ecs::{ event::EventReader, query::With, system::{Res, Single}}, input::{keyboard::KeyCode, mouse::MouseWheel, ButtonInput}, log::error, render::camera::Projection, window::{MonitorSelection, Window, WindowMode}};
 
 pub fn scroll_zoom_camera_system(
         mut evr_scroll: EventReader<MouseWheel>,
@@ -21,6 +21,21 @@ pub fn scroll_zoom_camera_system(
                     eprintln!("Scrolling Error: Projection is not Orthograpic as should be by Default");
                 }
             }
+        }
+    }
+}
+
+pub fn toggle_resolution(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut window: Single<&mut Window>,
+) {
+    if keys.just_pressed(KeyCode::F11) {
+        match window.mode {
+            bevy::window::WindowMode::Windowed => {
+                window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Primary);
+            }
+            bevy::window::WindowMode::BorderlessFullscreen(_) => window.mode = WindowMode::Windowed,
+            _ => error!("Window is in invalid mode")
         }
     }
 }
